@@ -1,0 +1,36 @@
+; --------------------------------------------------------
+; Example of batch file
+;
+; --------------------------------------------------------
+
+; Set custom variables
+
+set-var search-num  = 1
+
+[init]
+
+browse http://www.google.fr
+
+[search1]
+
+; search text on Google and submit with "I'm feeling lucky" button
+
+set-var search-text = {%cfg:my-search-{%var:search-num%}%}
+
+set q = {%var:search-text%}
+submit btnI
+
+[download]
+
+; write website data to file
+
+write ./google_search{%var:search-num%}.html
+
+[new-search]
+
+set-var search-num  = 2
+    
+history goto:[search1]
+
+play search1
+play download

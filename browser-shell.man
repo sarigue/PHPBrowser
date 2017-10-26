@@ -1,0 +1,332 @@
+--------------------------------------------------------
+--------------------------------------------------------
+
+AIDE A LA REDACTION D'UNE LISTE DE COMMANDES
+POUR LE NAVIGATEUR Browser.php
+
+@author Francois RAOULT
+
+@copyright GNU/LGPL
+
+
+--------------------------------------------------------
+CONFIGURATION
+--------------------------------------------------------
+
+Il s'agit d'un fichier INI avec 3 sections :
+
+* Section [browser] pour la configuration du navigateur
+
+- user-agent    : User-Agent à simuler
+- cookie-file   : Fichier de cookies à utiliser
+- exit-if-error : 1 pour quitter le script en cas d'erreur HTTP
+
+
+* Section [shell] pour la configuration de l'interpréteur
+
+- pause-duration           : Durée de la pause en secondes après chaque évènement de navigation.
+- check-formelement-exists : 1 pour vérifier l'existance de l'élément de formulaire à définir
+- check-formelement-type   : 1 pour vérifier que l'élément de formulaire soit du "bon" type (checkbox pour commande check/uncheck)
+- debug                    : 1 pour afficher activer le mode debug (affichage de messages d'exécution)
+
+* Section [data] pour les variables de configuration du fichier de commandes
+
+Sous la forme classique d'un fichier INI 
+nom = valeur
+
+
+----------------------------------------------------------------------------
+FONCTIONNEMENT GENERAL :
+----------------------------------------------------------------------------
+Il s'agit d'un fichier listant linéairement les commandes à exécuter,
+de façon similaire à ce que peut être un .bat pour Windows ou un .sh pour Linux
+
+
+- LES COMMENTAIRES
+
+Toute ligne commençant par ; sera considérée comme un commentaire.
+Il n'existe pas de groupes de commentaire
+Il n'y a pas possibilité de mettre une commentaire en fin de ligne
+
+
+- LES LABELS / GROUPES DE COMMANDE
+
+Il est possible de définir un label/groupe de commandes de la même façon qu'un .ini.
+Par exemple pour définir le label "label" :
+[label]
+
+Il est possible de revenir à ce groupe par une navigation dans l'historique avec la commande
+(même action qu'un clic dans l'historique du navigateur) :
+history goto:[label]
+
+
+Il est également possible de rejouer les commandes de ce groupe :
+play label
+
+- LES COMMANDES
+
+Chaque ligne est de la forme :
+commande parametre
+où parametre (parfois facultatif) peut être de la forme: nom = valeur
+
+
+----------------------------------------------------------------------------
+COMMANDES DISPONIBLES :
+----------------------------------------------------------------------------
+
+browse   : Navige vers une URL
+submit   : Valide le formulaire. Peut être suivi du nom ou de l'ID du bouton à utiliser
+write    : Enregistre le contenu récupérée dans le fichier indiqué
+print    : Affiche le contenu récupéré directement dans la consile (la fenêtre d'exécution)
+history  : Naviguer dans l'historique
+use-form : Nom du formulaire à utiliser pour la suite.
+reset    : Réinitialise le formulaire
+set      : Définir une valeur pour un élément de formulaire. Pour plusieurs valeurs, utiliser un JSON
+unset    : Supprime l'élément des données de formulaire qui seront transmise
+check    : Coche une checkbox. Equivalent de set avec "on" pour valeur
+uncheck  : Décoche une checkbox. Equivalent de unset
+set-var  : Définie une variable de script qui pourra être appelée par %var:nom-de-la-variable%
+include  : Exécuter un autre fichier de commande
+message  : Affiche un message dans la console (la fenêtre d'exécution)
+debug    : Affiche un message dans la console *si* le mode debug est activé (cf. fichier cfg section [shell])
+
+
+
+EXEMPLES DE COMMANDES :
+
+browse http://www.google.fr  Pour naviguer à l'URL http://www.google.fr
+
+include commandes.browser Pour lancer les commandes définies dans commandes.browser 
+
+use-form          Utilise pour la suite le premier formulaire trouvé dans la page
+use-form formName Utilise pour la suite le formulaire avec le nom "formName"
+use-form #formID  Utilise pour la suite le formulaire avec l'ID "formID"
+
+submit               Pour envoyer le formulaire
+submit submitButton  Pour envoyer le formulaire en utilisant le bouton ayant pour nom "submitButton"
+submit #submitBtnId  Pour envoyer le formulaire en utilisant le bouton ayant pour id "submitBtnId"
+
+write  nomDuFichier  Enregistre le contenu récupéré lors du dernier browse/submit dans le fichier "nomDuFichier"
+
+history goto:[label]   Retourne au label "label" en utilisant l'historique (comme un clic dans l'historique du navigateur)
+history -1             Retourne à la page précédente
+history back           Retourne à la page précédente
+history +1             Retourne à la page suivante
+history forward        Retourne à la page suivante
+history 0              Recharge la page
+history reload         Recharge la page
+history -5             Retourne 5 pages en arrière
+history +2             Retourne 2 pages en avant
+history [param] browse Applique le paramètre (goto, -N, +N, reload, etc.) en indiquant de faire un simple browse (ne pas re-soumettre le formulaire éventuel)
+
+reset                  Réinitialise le formulaire en cours
+
+set nom = valeur       Attribut "valeur" à l'élément ayant le nom "nom"
+set #id = valeur       Attribut "valeur" à l'élément ayant l'id "id"
+set nom = ["a", "b"]   Attribut la liste de valeurs "a" et "b" à l'élément nommé "nom"
+set nom = "["a", "b"]" Attribut la valeur ["a", "b"] à l'élément nommé "nom"
+
+check macheckbox       Coche la checkbox ayant pour nom "macheckbox"
+check #checkboxUD      Coche la checkbox ayant pour id "checkboxID"
+uncheck macheckbox     DéCoche la checkbox ayant pour nom "macheckbox"
+uncheck #checkboxUD    DéCoche la checkbox ayant pour id "checkboxID"
+
+unset nom              Supprime l'élément nommé "nom" du formulaire à transmettre
+unset #id              Supprime l'élément identifé par  "id" du formulaire à transmettre
+
+set-var variable = val Attribut la valeur "val" à la variable "variable". La variable pourra être utilisée en appelant %var:variable%
+
+print mon message      Affiche "mon message" suivi d'un saut de ligne
+print                  Affiche juste une ligne vide
+
+debug message de debug Affiche "message de debug" si debug = 1
+debug                  Affiche une ligne vide si debug = 1
+
+
+----------------------------------------------------------------------------
+LES VARIABLES
+----------------------------------------------------------------------------
+
+Il est possible, dans le script ou même dans le fichier de configuration (section [data]),
+d'utiliser des variables qui peuvent être de 4 types:
+
+- Variables système
+- Variables issues de fonctions
+- Variables du script
+- Variables de configuration
+
+Les variables ont la forme %source:variable% ou bien {%source:variable%}
+Cette dernière forme est recommandée.
+Elle permet en effet l'imbrication de variables (et de rendre ainsi variable... les noms de variables eux-même):
+
+%source:bla-bla-{%source:autre-variable%}%
+
+
+----------------------------------------------------------------------------
+LES VARIABLES SYSTEMES :
+----------------------------------------------------------------------------
+
+Elles sont accessibles par %system:nom-de-l'element%  ou {%system:nom-de-l'element%}
+
+
+%system:login%        Retourne le nom d'utilisateur sous lequel s'exécute le script
+%system:timestamp%    Retourne le timestamp (nb de secondes écoulés depuis 1900 ou 1970 selon le systeme)
+%system:os%           Retourne le nom de l'OS : "win" ou "linux" (en minuscule)
+%system:rand%         Retourne un nombre entier aléatoire entre 0 et la valeur max du système. Possibilité de définir un min et max comme ci-dessous:
+%system:rand:0:1000%  Retourne un nombre entier aléatoire entre 0 et 1000
+
+----------------------------------------------------------------------------
+LES VARIABLES ISSUES DE FONCTIONS :
+----------------------------------------------------------------------------
+
+Les fonctions s'utilisent par %nom-de-la-fonction:parametre% ou bien {%nom-de-la-fonction:parametre%}
+
+Les fonctions disponibles sont :
+
+%date:format%                    Retourne la date du jour selon le format donné
+%date_interval:interval:format%  Retourne la date calculée, selon le format donné
+
+
+- format peut valoir:
+AAAA : Année sur 4 chiffres
+AA   : Année sur 2 chiffres
+MMM  : Mois (texte) sur 3 caractères ("jan", "feb", "mar", "apr", "may", etc.) 
+MM   : Mois sur 2 chiffres
+JJJ  : Jour de la semaine (texte) sur 3 caractères ("mon", "tue", "wed", etc.)
+JJ   : Jour sur 2 chiffres
+j    : Jour de la semaine (numérique) sur 1 chiffres (0 = dimanche, 6 = samedi)
+SS   : Numéro de semaine sur 2 chiffres
+php:format-php : Permet d'utiliser directement le format PHP
+
+- interval : Intervale en anglais.
+
+
+Exemples :
+
+%date:php:Y-m-d H:i:s%       Retourne la date du jour au format AAAA-MM-DD hh:mm:ss
+%date:semaine SS, JJJ%       Retourne le texte "semaine <numéro de semaine>, <nom du jour>" du jour actuel
+
+%date_interval:-1 month:MM%  Retourne le mois sur 2 chiffres du mois passé
+%date_interval:-17 days:WW%  Retourne la semaine sur 2 chiffres d'il y a 17 jours
+%date_interval:5 years:DDD%  Retourne le nom du jour qui tombera dans 5 ans
+
+Exemple avec des variables imbriquées,
+pour trouver le nom du jour qui tombera ou est tombé
+dans un interval indiqué dans le champ "intervale" du fichier de configuration
+
+%date_interval:{%cfg:intervale}:DDD%
+ou encore :
+{%date_interval:{%cfg:intervale}:DDD%}
+
+
+----------------------------------------------------------------------------
+LES VARIABLES DE SCRIPT
+----------------------------------------------------------------------------
+
+Toute variables définie par set-var dans le fichiers de commande
+sera accessible par :
+%var:ma-variable% ou bien {%var:ma-variable%}
+
+Par exemple
+
+set-var evenements = sorties
+
+Alors
+
+%var:evenements% ou {%var:evenements%} retournera "sorties"
+
+
+----------------------------------------------------------------------------
+LES VARIABLES DE CONFIGURATION
+----------------------------------------------------------------------------
+
+Pour récupérer la valeur des champs définis  à la section [data] du fichier de configuration,
+
+%cfg:nom-du-champ% ou bien encore {%cfg:nom-du-champ%}
+
+Par exemple si le fichier de configurationt est :
+
+~~~~~~~~~~~~~~
+[browser]
+user-agent = Mozilla/Script
+
+[script]
+pause-duration = 1
+
+[data]
+username = MyLogin
+password = MyP@ssw0rd!
+~~~~~~~~~~~~~~
+
+Alors, pour mettre "MyLogin" dans le champ "login" d'un formulaire,
+et "MyP@ssw0rd!" dans le champ "pwd", puis valider le formulaire,
+les commandes seront:
+
+set login = %cfg:username%
+set pwd   = %cfg:password%
+submit
+
+
+Autre exemples avec variables imbriquées :
+
+Si l'on souhaite écrire le contenu récupéré sur le web,
+un coup dans le fichier C:\mon-fichier-1-automatique.csv
+et un coup dans le fichier C:\mon-fichier-2-automatique.csv
+
+Alors on peut faire : 
+
+- Fichier de configuration :
+~~~~~~~~~~~~~~
+[data]
+file-name-1 = C:\mon-fichier-1-automatique
+file-name-2 = C:\mon-fichier-2-automatique
+~~~~~~~~~~~~~~
+
+- Fichier de commandes :
+~~~~~~~~~~~~~~
+set-var variante-fichier = 1
+write %cfg:file-name-{%var:variante-fichier%}%.csv
+
+set-var variante-fichier = 2
+write %cfg:file-name-{%var:variante-fichier%}%.csv
+~~~~~~~~~~~~~~
+
+Dans ce cas,  on a   : write %cfg:file-name-1%.csv
+puis au coup suivant : write %cfg:file-name-2%.csv
+
+Soit : write C:\mon-fichier-1-automatique.csv
+Puis : write C:\mon-fichier-2-automatique.csv
+
+
+----------------------------------------------------------------------------
+LES VARIABLES UTILISEES DANS LE FICHIER DE CONFIGURATION
+----------------------------------------------------------------------------
+
+Il est possible d'utiliser des variables dans les valeurs des champs (section [data] uniquement)
+
+Par exemple, dans le dernier cas présenté ci-dessus, il aurait été également possible de faire:
+
+- Fichier de configuration :
+~~~~~~~~~~~~~~
+[data]
+file-name = C:\mon-fichier-{%var:variante-fichier%}-automatique
+~~~~~~~~~~~~~~
+
+- Fichier de commandes :
+~~~~~~~~~~~~~~
+set-var variante-fichier = 1
+write %cfg:file-name%.csv
+
+set-var variante-fichier = 2
+write %cfg:file-name%.csv
+~~~~~~~~~~~~~~
+
+On pourrait aussi vouloir placer la date au format AAAA-MM-JJ dans le fichier généré :
+
+- Fichier de configuration:
+~~~~~~~~~~~~~~
+[data]
+file-name = C:\mon-fichier-{%var:variante-fichier%}-automatique-%date:AAAA-MM-JJ%
+~~~~~~~~~~~~~~
+
+
