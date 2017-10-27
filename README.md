@@ -170,9 +170,48 @@ Variables can be nested :
 
     {%cfg:constant-string{%var:var-name%}%}
 
+## Configuration file
+
+There are 3 sections :
+
+[browser] for the browser configuration :
+user-agent = User-Agent
+cookie-file = Cookie file to user 
+exit-if-error = 1 to exit in case of server error (not 2xx or 1xx or 3xx code)
+
+[shell] for the shell configuration
+pause-duration = (duration in seconds after each network call)
+check-formelement-exists = 1 to set field value only if element exists in DOM
+check-formelement-type = 1 to check/uncheck checkbox only if the element is a checkbox
+debug = 1 to show execution messages
+
+[data] for your custom data
+
+custom-field = custom-value
+
+theses fields will be use in batch file and config file with {%cfg:field-name%}
+You can use variables, functions and config fields in the [data] section
+
+For example :
+
+    [data]
+    
+    file-name = /home/path/PREFIX_MYFILE_DATA-{%date:php:Y-m-d_His%}-{%system:os%}.EXT
+
+If the date is 2017-11-01 15:26, and the OS is linux,
+{%cfg:file-name%} returns "/home/path/PREFIX_MYFILE_DATA-2017-11-01_15:26-linux.EXT"
+
+The variables can be nested :
+
+For example :
+
+    [data]
+ 
+    date-format = php:Y-m-d_His
+    file-name = /home/path/PREFIX_MYFILE_DATA-{%date:{%cfg:date-format%}%}-{%system:os%}.EXT
+
 
 ## Example
-    
     
 ### Configuration file
  
@@ -263,51 +302,9 @@ You must use :
     ...
 
 
-
-## Configuration file
-
-There are 3 sections :
-
-[browser] for the browser configuration :
-user-agent = User-Agent
-cookie-file = Cookie file to user 
-exit-if-error = 1 to exit in case of server error (not 2xx or 1xx or 3xx code)
-
-[shell] for the shell configuration
-pause-duration = (duration in seconds after each network call)
-check-formelement-exists = 1 to set field value only if element exists in DOM
-check-formelement-type = 1 to check/uncheck checkbox only if the element is a checkbox
-debug = 1 to show execution messages
-
-[data] for your custom data
-
-custom-field = custom-value
-
-theses fields will be use in batch file and config file with {%cfg:field-name%}
-You can use variables, functions and config fields in the [data] section
-
-For example :
-
-    [data]
-    
-    file-name = /home/path/PREFIX_MYFILE_DATA-{%date:php:Y-m-d_His%}-{%system:os%}.EXT
-
-If the date is 2017-11-01 15:26, and the OS is linux,
-{%cfg:file-name%} returns "/home/path/PREFIX_MYFILE_DATA-2017-11-01 15:26-linux.EXT"
-
-The variables can be nested :
-
-For example :
-
-    [data]
- 
-    date-format = php:Y-m-d_His
-    file-name = /home/path/PREFIX_MYFILE_DATA-{%date:{%cfg:date-format%}%}-{%system:os%}.EXT
-
-
 ## License
 
-[GNU / LGPL v.3](https://www.gnu.org/licenses/gpl.html)
+[GNU / LGPL v.3](https://www.gnu.org/licenses/lgpl.html)
 
     Copyright (C) 2017 Francois RAOULT
 
@@ -315,7 +312,7 @@ For example :
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
 
-       https://www.gnu.org/licenses/gpl.html
+       https://www.gnu.org/licenses/lgpl.html
 
     Unless required by applicable law or agreed to in writing, software
     distributed under the License is distributed on an "AS IS" BASIS,

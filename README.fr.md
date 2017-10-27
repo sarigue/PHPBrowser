@@ -201,7 +201,7 @@ Par exemple :
     file-name = /home/path/PREFIX_MYFILE_DATA-{%date:php:Y-m-d_His%}-{%system:os%}.EXT
 
 Si la date est le 1er novembre 2017 à 15h26, et que le système est Linux, alors
-{%cfg:file-name%} renvois "/home/path/PREFIX_MYFILE_DATA-2017-11-01 15:26-linux.EXT"
+{%cfg:file-name%} renvois "/home/path/PREFIX_MYFILE_DATA-2017-11-01_15:26-linux.EXT"
 
 Les variables peuvent être imbriquées
 
@@ -306,14 +306,14 @@ Vous devez utiliser :
 
 ## License
 
-[GNU / LGPL v.3](https://www.gnu.org/licenses/gpl.html)
+[GNU / LGPL v.3](https://www.gnu.org/licenses/lgpl.html)
 
     Copyright (C) 2017 Francois RAOULT
 
     Distribué sous licence LGPL version 3.0
-    Vous pouvez obtenir le texte de la licence a
+    Vous pouvez obtenir le texte de la licence a:
 
-       https://www.gnu.org/licenses/gpl.html
+       https://www.gnu.org/licenses/lgpl.html
 
     ---------
 
@@ -321,7 +321,7 @@ Vous devez utiliser :
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
 
-       https://www.gnu.org/licenses/gpl.html
+       https://www.gnu.org/licenses/lgpl.html
 
     Unless required by applicable law or agreed to in writing, software
     distributed under the License is distributed on an "AS IS" BASIS,
